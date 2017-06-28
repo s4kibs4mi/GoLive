@@ -1,12 +1,9 @@
 package ninja.sakib.golive.rtc
 
 import android.util.Log
-import ninja.sakib.golive.config.getMqttUri
-import ninja.sakib.golive.config.getStreamSessionDescription
-import ninja.sakib.golive.config.getStreamTopic
-import ninja.sakib.golive.config.getSubscriptionTopic
 import ninja.sakib.golive.listeners.RtcActionListener
 import com.eclipsesource.json.Json
+import ninja.sakib.golive.config.*
 import ninja.sakib.golive.utils.*
 import org.eclipse.paho.client.mqttv3.*
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
@@ -52,10 +49,10 @@ class MqttPeer : MqttCallbackExtended, IMqttActionListener {
     fun onSubscribe() {
         if (isListener()) {
             logD(TAG, "IAmListener")
-            mqttClient!!.subscribe(getSubscriptionTopic(), 0)
+            mqttClient!!.subscribe(getChannelName(), 0)
         } else {
             logD(TAG, "IAmPublisher")
-            mqttClient!!.subscribe(getStreamTopic(), 0)
+            mqttClient!!.subscribe(getChannelName(), 0)
         }
     }
 

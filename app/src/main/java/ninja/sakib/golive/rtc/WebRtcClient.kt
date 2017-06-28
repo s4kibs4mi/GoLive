@@ -13,10 +13,6 @@ import org.webrtc.*
  */
 
 class WebRtcClient(rtcListener: RtcListener, connectionParameter: RtcPeerConnectionParameter, eglContext: EGLContext) {
-    var rtcListener: RtcListener = rtcListener
-    var connectionParameter: RtcPeerConnectionParameter = connectionParameter
-    var eglContext: EGLContext = eglContext
-
     var peerConnectionFactory: PeerConnectionFactory
     var iceServers = mutableListOf<PeerConnection.IceServer>()
     var rtcMediaConstraints: MediaConstraints

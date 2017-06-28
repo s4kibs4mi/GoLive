@@ -19,4 +19,6 @@ interface RtcListener {
     fun onRemoteDisconnected()
 
     fun onRemoteConnected()
+
+    fun onSdpReady()
 }

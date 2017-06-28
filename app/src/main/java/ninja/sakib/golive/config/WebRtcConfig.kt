@@ -9,20 +9,21 @@ import org.webrtc.SessionDescription
  * := Coffee : Dream : Code
  */
 
-private var streamTopic = "/w/ch/101"
+private var streamTopic = "/w/ch/"
 private var videoStream: Boolean = true
 private var streamSessionDescription: SessionDescription? = null
+private var channelName = ""
 
 fun getMqttUri(): String {
     return "tcp://iot.eclipse.org:1883"
 }
 
-fun getStreamTopic(): String {
-    return streamTopic
+fun getChannelName(): String {
+    return "$streamTopic$channelName"
 }
 
-fun getSubscriptionTopic(): String {
-    return "/w/ch/1234567890"
+fun setChannelName(channel: String) {
+    channelName = channel
 }
 
 fun setStreamSessionDescription(sessionDescription: SessionDescription) {

@@ -3,15 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.codersgarage.nurtcradio.MainActivity">
+    tools:context="ninja.sakib.golive.views.MainActivity">
 
     <android.opengl.GLSurfaceView
         android:id="@+id/remoteStreamView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
-    <!--<SurfaceView-->
-    <!--android:id="@+id/myStreamView"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent" />-->
 </RelativeLayout>

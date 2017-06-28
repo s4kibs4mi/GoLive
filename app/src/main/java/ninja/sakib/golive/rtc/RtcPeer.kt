@@ -1,8 +1,8 @@
 package ninja.sakib.golive.rtc
 
 import android.util.Log
+import ninja.sakib.golive.config.getChannelName
 import ninja.sakib.golive.config.getStreamSessionDescription
-import ninja.sakib.golive.config.getStreamTopic
 import ninja.sakib.golive.config.setStreamSessionDescription
 import ninja.sakib.golive.listeners.RtcListener
 import ninja.sakib.golive.utils.getAnswerRequest
@@ -38,7 +38,7 @@ class RtcPeer(peerConnectionFactory: PeerConnectionFactory, iceServers: MutableL
             peerConnection.createOffer(getSdpObserver(), rtcMediaConstraints)
         } else {
             val mqttPublishEvent = MqttPublishEvent()
-            mqttPublishEvent.topic = getStreamTopic()
+            mqttPublishEvent.topic = getChannelName()
             mqttPublishEvent.message = getPingRequest()
             EventBus.getDefault().post(mqttPublishEvent)
         }
@@ -55,7 +55,7 @@ class RtcPeer(peerConnectionFactory: PeerConnectionFactory, iceServers: MutableL
             } else if (peerConnection.localDescription.type == SessionDescription.Type.ANSWER) {
                 Log.d(TAG, "SDP Answer")
                 val mqttPublishEvent = MqttPublishEvent()
-                mqttPublishEvent.topic = getStreamTopic()
+                mqttPublishEvent.topic = getChannelName()
                 mqttPublishEvent.message = getAnswerRequest(peerConnection.localDescription)
                 EventBus.getDefault().post(mqttPublishEvent)
             } else {

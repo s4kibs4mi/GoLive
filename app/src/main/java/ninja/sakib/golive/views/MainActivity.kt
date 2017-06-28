@@ -1,5 +1,6 @@
 package ninja.sakib.golive.views
 
+import android.content.Intent
 import android.graphics.Point
 import android.opengl.GLSurfaceView
 import android.os.Bundle
@@ -7,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Window
 import android.view.WindowManager
+import com.afollestad.materialdialogs.MaterialDialog
 import ninja.sakib.golive.R
 import ninja.sakib.golive.listeners.RtcListener
 import ninja.sakib.golive.rtc.RtcAction
@@ -138,6 +140,10 @@ class MainActivity : AppCompatActivity(), RtcListener {
         super.onDestroy()
     }
 
+    override fun onSdpReady() {
+
+    }
+
     @Subscribe
     fun onRtcEvent(rtcActionEvent: RtcActionEvent) {
         logD(TAG, "OnRtcActionEvent")
@@ -182,5 +188,11 @@ class MainActivity : AppCompatActivity(), RtcListener {
         } else {
             Log.d(TAG, "Session NULL")
         }
+    }
+
+    override fun onBackPressed() {
+        val nextIntent = Intent(applicationContext, LauncherActivity::class.java)
+        startActivity(nextIntent)
+        finish()
     }
 }

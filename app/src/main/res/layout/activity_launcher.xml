@@ -3,7 +3,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.codersgarage.nurtcradio.views.LauncherActivity">
+    tools:context="ninja.sakib.golive.views.LauncherActivity">
+
+    <TextView
+        android:id="@+id/appTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/app_title"
+        android:textAlignment="center"
+        android:textSize="40sp" />
+
+    <EditText
+        android:id="@+id/channelName"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/appTitle"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="60dp"
+        android:hint="@string/channel_name_hint" />
 
     <Button
         android:id="@+id/radioStreamBtn"
@@ -13,7 +32,7 @@
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:text="Stream"
+        android:text="@string/stream_btn_text"
         android:textAllCaps="false"
         android:textSize="24sp" />
 
@@ -24,7 +43,7 @@
         android:layout_above="@+id/radioStreamBtn"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:text="Listen"
+        android:text="@string/listen_btn_text"
         android:textAllCaps="false"
         android:textSize="24sp" />
 </RelativeLayout>

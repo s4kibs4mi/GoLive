@@ -4,9 +4,8 @@ import android.content.Context
 import android.hardware.Camera
 import android.media.AudioManager
 import android.util.Log
-import ninja.sakib.golive.config.getSubscriptionTopic
-import ninja.sakib.golive.rtc.MqttPeer
 import com.eclipsesource.json.JsonObject
+import ninja.sakib.golive.config.getChannelName
 import org.webrtc.SessionDescription
 import java.lang.Exception
 import java.util.*
@@ -19,7 +18,6 @@ import java.util.*
  */
 
 private var listener: Boolean = true
-private var mqttPeer: MqttPeer? = null
 
 fun isListener(): Boolean {
     return listener
@@ -31,7 +29,7 @@ fun setListener(isListener: Boolean) {
 
 fun getNameOfFrontFacingCamera(): String? {
     for (i in 0..Camera.getNumberOfCameras()) {
-        var cameraInfo = Camera.CameraInfo()
+        val cameraInfo = Camera.CameraInfo()
         try {
             Camera.getCameraInfo(i, cameraInfo)
             if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
@@ -44,7 +42,7 @@ fun getNameOfFrontFacingCamera(): String? {
     return null
 }
 
-fun formatToRelaySdpOnly(sessionDescription: SessionDescription): SessionDescription {
+fun formatToRelayOnlySdp(sessionDescription: SessionDescription): SessionDescription {
     val formattedSdp = StringBuilder()
     val scanner = Scanner(sessionDescription.description)
     while (scanner.hasNextLine()) {
@@ -60,7 +58,7 @@ fun formatToRelaySdpOnly(sessionDescription: SessionDescription): SessionDescrip
 fun getPingRequest(): String {
     return JsonObject()
             .add("action", "ping")
-            .add("subscriber", getSubscriptionTopic()).toString()
+            .add("subscriber", getChannelName()).toString()
 }
 
 fun getAnswerRequest(sessionDescription: SessionDescription): String {
@@ -78,19 +76,11 @@ fun getPingResult(sessionDescription: SessionDescription): String {
 }
 
 fun getPongResult(packet: JsonObject): SessionDescription {
-    Log.d("Raw Packet", packet.toString())
-
-    Log.d("PongResult : ${SessionDescription.Type.valueOf(packet.getString("type", ""))}",
-            packet.getString("session", ""))
     return SessionDescription(SessionDescription.Type.valueOf(packet.getString("type", "")),
             packet.getString("session", ""))
 }
 
 fun getAnswerResult(packet: JsonObject): SessionDescription {
-    Log.d("Raw Packet", packet.toString())
-
-    Log.d("AnswerResult : ${SessionDescription.Type.valueOf(packet.getString("type", ""))}",
-            packet.getString("session", ""))
     return SessionDescription(SessionDescription.Type.valueOf(packet.getString("type", "")),
             packet.getString("session", ""))
 }

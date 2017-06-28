@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">GoLive</string>
+    <string name="app_title">Go Live</string>
+    <string name="channel_name_hint">Channel Name</string>
+    <string name="stream_btn_text">Stream</string>
+    <string name="listen_btn_text">Listen</string>
+    <string name="stream_progress_title">Please Wait</string>
+    <string name="stream_progress_text">Stream Beginning…</string>
 </resources>
