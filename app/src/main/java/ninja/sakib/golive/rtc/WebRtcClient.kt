@@ -32,13 +32,12 @@ class WebRtcClient(rtcListener: RtcListener, connectionParameter: RtcPeerConnect
 
         peerConnectionFactory = PeerConnectionFactory()
 
-        iceServers.add(PeerConnection.IceServer("turn:192.158.29.39:3478?transport=udp", "28224511:1379330808", "JZEOEt2V3Qb0y27GRntt2u2PAYA="))
+        iceServers.add(PeerConnection.IceServer("turn:numb.viagenie.ca", "webrtc@live.com", "muazkh"))
 
         rtcMediaConstraints = MediaConstraints()
         rtcMediaConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveAudio", isListener().toString()))
         rtcMediaConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", isListener().toString()))
         rtcMediaConstraints.optional.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
-        rtcMediaConstraints.optional.add(MediaConstraints.KeyValuePair("RtpDataChannels", "true"))
 
         localMediaStream = peerConnectionFactory.createLocalMediaStream("ARDAMS")
 
@@ -57,6 +56,7 @@ class WebRtcClient(rtcListener: RtcListener, connectionParameter: RtcPeerConnect
         localAudioSource = peerConnectionFactory.createAudioSource(MediaConstraints())
         localAudioTrack = peerConnectionFactory.createAudioTrack("ARDAMSa0", localAudioSource)
         localMediaStream.addTrack(localAudioTrack)
+
         rtcListener.onLocalStream(localMediaStream)
 
         rtcPeer = RtcPeer(peerConnectionFactory, iceServers, rtcMediaConstraints, localMediaStream, rtcListener)

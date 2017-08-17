@@ -1,25 +1,30 @@
 package ninja.sakib.golive.views
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Point
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.widget.TextView
 import ninja.sakib.golive.R
-import ninja.sakib.golive.config.getStreamChannelName
 import ninja.sakib.golive.config.getUserChannelName
+import ninja.sakib.golive.config.isVideoStream
 import ninja.sakib.golive.listeners.RtcListener
 import ninja.sakib.golive.rtc.RtcAction
 import ninja.sakib.golive.rtc.RtcActionEvent
 import ninja.sakib.golive.rtc.RtcPeerConnectionParameter
 import ninja.sakib.golive.rtc.WebRtcClient
+import ninja.sakib.golive.utils.isListener
 import ninja.sakib.golive.utils.logD
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.jetbrains.anko.find
+import org.jetbrains.anko.toast
 import org.webrtc.*
 
 /**
@@ -34,23 +39,23 @@ class MainActivity : AppCompatActivity(), RtcListener {
 
     private val VIDEO_CODEC_VP9 = "VP9"
     private val AUDIO_CODEC_OPUS = "opus"
-    // Local preview screen position before call is connected.
-    private val LOCAL_X_CONNECTING = 0
-    private val LOCAL_Y_CONNECTING = 0
-    private val LOCAL_WIDTH_CONNECTING = 100
-    private val LOCAL_HEIGHT_CONNECTING = 100
-    // Local preview screen position after call is connected.
-    private val LOCAL_X_CONNECTED = 72
-    private val LOCAL_Y_CONNECTED = 72
-    private val LOCAL_WIDTH_CONNECTED = 25
-    private val LOCAL_HEIGHT_CONNECTED = 25
-    // Remote video screen position
-    private val REMOTE_X = 0
-    private val REMOTE_Y = 0
-    private val REMOTE_WIDTH = 100
-    private val REMOTE_HEIGHT = 100
+
+    // To Hide Video Screen
+    private val HIDDEN_VIEW_X = 0
+    private val HIDDEN_VIEW_Y = 0
+    private val HIDDEN_VIEW_WIDTH = 0
+    private val HIDDEN_VIEW_HEIGHT = 0
+
+    // To Show Video Screen
+    private val VISIBLE_VIEW_X = 0
+    private val VISIBLE_VIEW_Y = 0
+    private val VISIBLE_VIEW_WIDTH = 100
+    private val VISIBLE_VIEW_HEIGHT = 100
+
     private val scalingType = VideoRendererGui.ScalingType.SCALE_ASPECT_FILL
+
     private lateinit var remoteStreamView: GLSurfaceView
+    private lateinit var connectingNotification: TextView
 
     private lateinit var mLocalVideoTrack: VideoTrack
     private lateinit var mLocalVideoRenderer: VideoRenderer
@@ -65,6 +70,7 @@ class MainActivity : AppCompatActivity(), RtcListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         window.addFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN or
@@ -77,9 +83,7 @@ class MainActivity : AppCompatActivity(), RtcListener {
 
         EventBus.getDefault().register(this)    // Registering Event Bus
 
-        remoteStreamView = find(R.id.remoteStreamView)
-        remoteStreamView.preserveEGLContextOnPause = true
-        remoteStreamView.keepScreenOn = true
+        onInit()    // UI Initialization
 
         VideoRendererGui.setView(remoteStreamView, {
             val displaySize = Point()
@@ -91,8 +95,20 @@ class MainActivity : AppCompatActivity(), RtcListener {
             webRtcClient = WebRtcClient(this, rtcPeerConnectionParameter, VideoRendererGui.getEGLContext())
         })
 
-        remoteRenderCallback = VideoRendererGui.create(REMOTE_X, REMOTE_Y, REMOTE_WIDTH, REMOTE_HEIGHT, scalingType, false)
-        localRenderCallback = VideoRendererGui.create(LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING, LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING, scalingType, true)
+        remoteRenderCallback = VideoRendererGui.create(VISIBLE_VIEW_X, VISIBLE_VIEW_Y, VISIBLE_VIEW_WIDTH, VISIBLE_VIEW_HEIGHT, scalingType, false)
+        localRenderCallback = VideoRendererGui.create(VISIBLE_VIEW_X, VISIBLE_VIEW_Y, VISIBLE_VIEW_WIDTH, VISIBLE_VIEW_HEIGHT, scalingType, true)
+    }
+
+    private fun onInit() {
+        remoteStreamView = find(R.id.remoteStreamView)
+        remoteStreamView.preserveEGLContextOnPause = true
+        remoteStreamView.keepScreenOn = true
+
+        connectingNotification = find(R.id.connectingNotification)
+
+        if (isListener().not()) {
+            connectingNotification.visibility = View.GONE
+        }
     }
 
     override fun onStatusChanged(newStatus: String) {
@@ -102,7 +118,7 @@ class MainActivity : AppCompatActivity(), RtcListener {
     override fun onLocalStream(localStream: MediaStream) {
         Log.d("Rtc", "onLocalStream " + localStream.label())
 
-        if (true) {
+        if (isVideoStream()) {
             mLocalVideoTrack = localStream.videoTracks[0]
             mLocalVideoTrack.setEnabled(true)
             mLocalVideoRenderer = VideoRenderer(localRenderCallback)
@@ -110,13 +126,14 @@ class MainActivity : AppCompatActivity(), RtcListener {
         }
 
         VideoRendererGui.update(localRenderCallback,
-                LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING,
-                LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING,
+                VISIBLE_VIEW_X, VISIBLE_VIEW_Y, VISIBLE_VIEW_WIDTH, VISIBLE_VIEW_HEIGHT,
                 scalingType, true)
     }
 
     override fun onAddRemoteStream(remoteStream: MediaStream) {
-        if (true) {
+        logD("VideoChannel", remoteStream.videoTracks.size.toString())
+
+        if (isVideoStream()) {
             mRemoteVideoTrack = remoteStream.videoTracks[0]
             mRemoteVideoTrack.setEnabled(true)
             mRemoteVideoRenderer = VideoRenderer(remoteRenderCallback)
@@ -124,8 +141,7 @@ class MainActivity : AppCompatActivity(), RtcListener {
         }
 
         VideoRendererGui.update(remoteRenderCallback,
-                REMOTE_X, REMOTE_Y,
-                REMOTE_WIDTH, REMOTE_HEIGHT, scalingType, false)
+                VISIBLE_VIEW_X, VISIBLE_VIEW_Y, VISIBLE_VIEW_WIDTH, VISIBLE_VIEW_HEIGHT, scalingType, true)
     }
 
     override fun onRemoteDisconnected() {
@@ -134,6 +150,19 @@ class MainActivity : AppCompatActivity(), RtcListener {
 
     override fun onRemoteConnected() {
         Log.d(TAG, "Peers Connected")
+
+        if (isListener()) {
+            runOnUiThread {
+                connectingNotification.visibility = View.GONE
+            }
+
+            VideoRendererGui.update(localRenderCallback,
+                    HIDDEN_VIEW_X + 1, HIDDEN_VIEW_Y + 1, HIDDEN_VIEW_WIDTH + 1, HIDDEN_VIEW_HEIGHT + 1,
+                    scalingType, true)
+//            VideoRendererGui.update(remoteRenderCallback,
+//                    VISIBLE_VIEW_X, VISIBLE_VIEW_Y, VISIBLE_VIEW_WIDTH, VISIBLE_VIEW_HEIGHT,
+//                    scalingType, true)
+        }
     }
 
     override fun onDestroy() {
@@ -143,7 +172,10 @@ class MainActivity : AppCompatActivity(), RtcListener {
 
     override fun onSdpReady() {
         runOnUiThread {
-            title = "$title - ${getUserChannelName()}"
+            if (isListener().not()) {
+                title = "$title - ${getUserChannelName()}"
+                toast("Your stream is ready.")
+            }
         }
     }
 

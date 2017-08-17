@@ -9,4 +9,14 @@
         android:id="@+id/remoteStreamView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/connectingNotification"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:background="#2a5bc7"
+        android:gravity="center"
+        android:text="Please wait\nYou are being connected..."
+        android:textSize="24sp" />
 </RelativeLayout>
