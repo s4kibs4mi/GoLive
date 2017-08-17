@@ -3,6 +3,7 @@ package ninja.sakib.golive.rtc
 import android.opengl.EGLContext
 import ninja.sakib.golive.listeners.RtcListener
 import ninja.sakib.golive.utils.getNameOfFrontFacingCamera
+import ninja.sakib.golive.utils.isListener
 import org.webrtc.*
 
 /**
@@ -34,8 +35,8 @@ class WebRtcClient(rtcListener: RtcListener, connectionParameter: RtcPeerConnect
         iceServers.add(PeerConnection.IceServer("turn:192.158.29.39:3478?transport=udp", "28224511:1379330808", "JZEOEt2V3Qb0y27GRntt2u2PAYA="))
 
         rtcMediaConstraints = MediaConstraints()
-        rtcMediaConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"))
-        rtcMediaConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"))
+        rtcMediaConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveAudio", isListener().toString()))
+        rtcMediaConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", isListener().toString()))
         rtcMediaConstraints.optional.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
         rtcMediaConstraints.optional.add(MediaConstraints.KeyValuePair("RtpDataChannels", "true"))
 
