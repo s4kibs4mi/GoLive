@@ -7,7 +7,9 @@ import android.widget.Button
 import android.widget.EditText
 
 import ninja.sakib.golive.R
-import ninja.sakib.golive.config.setChannelName
+import ninja.sakib.golive.config.getRandomBroadcastId
+import ninja.sakib.golive.config.setUserChannelName
+import ninja.sakib.golive.config.setStreamChannelName
 import ninja.sakib.golive.rtc.MqttSubscribeEvent
 import ninja.sakib.golive.services.ConnectionService
 import ninja.sakib.golive.utils.enableLoudSpeaker
@@ -54,8 +56,9 @@ class LauncherActivity : AppCompatActivity() {
 
     private fun onDoListen() {
         if (isChannelNameEmpty().not()) {
-            setChannelName(channelName.text.toString())
             setListener(true)
+            setStreamChannelName(channelName.text.toString())
+            setUserChannelName(getRandomBroadcastId())
             enableLoudSpeaker(this)
             startStreamActivity()
         } else {
@@ -64,13 +67,9 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     private fun onDoStream() {
-        if (isChannelNameEmpty().not()) {
-            setChannelName(channelName.text.toString())
-            setListener(false)
-            startStreamActivity()
-        } else {
-            toast("Channel name must be non empty.")
-        }
+        setListener(false)
+        setUserChannelName(getRandomBroadcastId())
+        startStreamActivity()
     }
 
     private fun startStreamActivity() {

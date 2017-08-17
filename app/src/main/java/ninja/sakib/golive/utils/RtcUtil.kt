@@ -5,7 +5,8 @@ import android.hardware.Camera
 import android.media.AudioManager
 import android.util.Log
 import com.eclipsesource.json.JsonObject
-import ninja.sakib.golive.config.getChannelName
+import ninja.sakib.golive.config.getPreferredChannelName
+import ninja.sakib.golive.config.getUserChannelName
 import org.webrtc.SessionDescription
 import java.lang.Exception
 import java.util.*
@@ -55,32 +56,34 @@ fun formatToRelayOnlySdp(sessionDescription: SessionDescription): SessionDescrip
     return SessionDescription(sessionDescription.type, formattedSdp.toString())
 }
 
-fun getPingRequest(): String {
+fun getPingPacket(): String {
     return JsonObject()
-            .add("action", "ping")
-            .add("subscriber", getChannelName()).toString()
+            .add("subscriber", getUserChannelName())
+            .add("action", "ping").toString()
 }
 
-fun getAnswerRequest(sessionDescription: SessionDescription): String {
+fun getPongPacket(sessionDescription: SessionDescription): String {
     return JsonObject()
-            .add("action", "answer")
-            .add("session", sessionDescription.description)
-            .add("type", sessionDescription.type.name).toString()
-}
-
-fun getPingResult(sessionDescription: SessionDescription): String {
-    return JsonObject()
+            .add("subscriber", getUserChannelName())
             .add("action", "pong")
             .add("session", sessionDescription.description)
             .add("type", sessionDescription.type.name).toString()
 }
 
-fun getPongResult(packet: JsonObject): SessionDescription {
+fun getAnswerPacket(sessionDescription: SessionDescription): String {
+    return JsonObject()
+            .add("subscriber", getUserChannelName())
+            .add("action", "answer")
+            .add("session", sessionDescription.description)
+            .add("type", sessionDescription.type.name).toString()
+}
+
+fun parseAnswer(packet: JsonObject): SessionDescription {
     return SessionDescription(SessionDescription.Type.valueOf(packet.getString("type", "")),
             packet.getString("session", ""))
 }
 
-fun getAnswerResult(packet: JsonObject): SessionDescription {
+fun parsePong(packet: JsonObject): SessionDescription {
     return SessionDescription(SessionDescription.Type.valueOf(packet.getString("type", "")),
             packet.getString("session", ""))
 }

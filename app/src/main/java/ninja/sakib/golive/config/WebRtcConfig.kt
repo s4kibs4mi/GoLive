@@ -1,6 +1,8 @@
 package ninja.sakib.golive.config
 
+import ninja.sakib.golive.utils.isListener
 import org.webrtc.SessionDescription
+import java.util.*
 
 /**
  * := Coded with love by Sakib Sami on 6/17/17.
@@ -9,21 +11,33 @@ import org.webrtc.SessionDescription
  * := Coffee : Dream : Code
  */
 
-private var streamTopic = "/w/ch/"
+private var streamChannel = ""
+private var userChannel = ""
 private var videoStream: Boolean = true
 private var streamSessionDescription: SessionDescription? = null
-private var channelName = ""
 
 fun getMqttUri(): String {
-    return "tcp://iot.eclipse.org:1883"
+    return "tcp://128.199.184.221:1883"
 }
 
-fun getChannelName(): String {
-    return "$streamTopic$channelName"
+fun setStreamChannelName(streamChannelName: String) {
+    streamChannel = "$streamChannel$streamChannelName"
 }
 
-fun setChannelName(channel: String) {
-    channelName = channel
+fun getStreamChannelName(): String {
+    return streamChannel
+}
+
+fun getUserChannelName(): String {
+    return userChannel
+}
+
+fun setUserChannelName(userChannelName: String) {
+    userChannel = "$userChannel$userChannelName"
+}
+
+fun getPreferredChannelName(): String {
+    return if (isListener()) getUserChannelName() else getStreamChannelName()
 }
 
 fun setStreamSessionDescription(sessionDescription: SessionDescription) {
@@ -40,4 +54,9 @@ fun isVideoStream(): Boolean {
 
 fun setVideoStream(isVideoStream: Boolean) {
     videoStream = isVideoStream
+}
+
+fun getRandomBroadcastId(): String {
+    val randUID = UUID.randomUUID().toString().replace("-", "").substring(0, 5)
+    return if (isListener()) "/w/u/$randUID" else "/w/ch/$randUID"
 }

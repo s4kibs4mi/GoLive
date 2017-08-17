@@ -1,13 +1,12 @@
 package ninja.sakib.golive.rtc
 
 import android.util.Log
-import ninja.sakib.golive.config.getChannelName
-import ninja.sakib.golive.config.getStreamSessionDescription
-import ninja.sakib.golive.config.setStreamSessionDescription
+import ninja.sakib.golive.config.*
 import ninja.sakib.golive.listeners.RtcListener
-import ninja.sakib.golive.utils.getAnswerRequest
-import ninja.sakib.golive.utils.getPingRequest
+import ninja.sakib.golive.utils.getAnswerPacket
+import ninja.sakib.golive.utils.getPingPacket
 import ninja.sakib.golive.utils.isListener
+import ninja.sakib.golive.utils.logD
 import org.greenrobot.eventbus.EventBus
 import org.webrtc.*
 
@@ -35,32 +34,37 @@ class RtcPeer(peerConnectionFactory: PeerConnectionFactory, iceServers: MutableL
         rtcListener.onStatusChanged("CONNECTED")
 
         if (isListener().not()) {
+            // User want to stream, Creating Offer for later use
             peerConnection.createOffer(getSdpObserver(), rtcMediaConstraints)
         } else {
+            // User want to listen, Sending PING to get Offer
             val mqttPublishEvent = MqttPublishEvent()
-            mqttPublishEvent.topic = getChannelName()
-            mqttPublishEvent.message = getPingRequest()
+            mqttPublishEvent.topic = getStreamChannelName()
+            mqttPublishEvent.message = getPingPacket()
             EventBus.getDefault().post(mqttPublishEvent)
         }
     }
 
     override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?) {
         if (p0 != null && p0 == PeerConnection.IceGatheringState.COMPLETE) {
-            Log.d(TAG, "ICE Complete")
+            logD(TAG, "ICE Complete")
 
             if (peerConnection.localDescription.type == SessionDescription.Type.OFFER) {
-                Log.d(TAG, "SDP Offer")
+                logD(TAG, "SDP Offer")
                 setStreamSessionDescription(peerConnection.localDescription)
-                Log.d(TAG, getStreamSessionDescription()!!.description)
+                logD(TAG, getStreamSessionDescription()!!.description)
             } else if (peerConnection.localDescription.type == SessionDescription.Type.ANSWER) {
-                Log.d(TAG, "SDP Answer")
+                logD(TAG, "SDP Answer")
+
                 val mqttPublishEvent = MqttPublishEvent()
-                mqttPublishEvent.topic = getChannelName()
-                mqttPublishEvent.message = getAnswerRequest(peerConnection.localDescription)
+                mqttPublishEvent.topic = getStreamChannelName()
+                mqttPublishEvent.message = getAnswerPacket(peerConnection.localDescription)
                 EventBus.getDefault().post(mqttPublishEvent)
             } else {
                 Log.d(TAG, "SDP Unknown")
             }
+
+            rtcListener.onSdpReady()
         }
     }
 

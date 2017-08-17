@@ -8,8 +8,9 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Window
 import android.view.WindowManager
-import com.afollestad.materialdialogs.MaterialDialog
 import ninja.sakib.golive.R
+import ninja.sakib.golive.config.getStreamChannelName
+import ninja.sakib.golive.config.getUserChannelName
 import ninja.sakib.golive.listeners.RtcListener
 import ninja.sakib.golive.rtc.RtcAction
 import ninja.sakib.golive.rtc.RtcActionEvent
@@ -141,7 +142,9 @@ class MainActivity : AppCompatActivity(), RtcListener {
     }
 
     override fun onSdpReady() {
-
+        runOnUiThread {
+            title = "$title - ${getUserChannelName()}"
+        }
     }
 
     @Subscribe

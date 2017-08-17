@@ -49,36 +49,39 @@ class MqttPeer : MqttCallbackExtended, IMqttActionListener {
     fun onSubscribe() {
         if (isListener()) {
             logD(TAG, "IAmListener")
-            mqttClient!!.subscribe(getChannelName(), 0)
+            mqttClient!!.subscribe(getUserChannelName(), 0)
         } else {
             logD(TAG, "IAmPublisher")
-            mqttClient!!.subscribe(getChannelName(), 0)
+            mqttClient!!.subscribe(getUserChannelName(), 0)
         }
     }
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
         if (message != null) {
             val packet = Json.parse(String(message.payload)).asObject()
-            Log.d("Received Raw Packet", packet.toString())
+            logD("Received Raw Packet", packet.toString())
 
             val rtcAction = RtcAction.valueOf(packet.getString("action", "").toUpperCase())
             val subscriber = packet.getString("subscriber", "")
 
             when (rtcAction) {
                 RtcAction.PING -> {
-                    mqttClient!!.publish(subscriber, getPingResult(getStreamSessionDescription()!!).toByteArray(), 0, false)
+                    val pingResult = getPongPacket(getStreamSessionDescription()!!)
+                    mqttClient!!.publish(subscriber, pingResult.toByteArray(), 0, false)
                     if (rtcActionListener != null) {
                         rtcActionListener!!.onPing()
                     }
                 }
                 RtcAction.PONG -> {
+                    val pongResult = parsePong(packet)
                     if (rtcActionListener != null) {
-                        rtcActionListener!!.onPong(getPongResult(packet))
+                        rtcActionListener!!.onPong(pongResult)
                     }
                 }
                 RtcAction.ANSWER -> {
+                    val answerResult = parseAnswer(packet)
                     if (rtcActionListener != null) {
-                        rtcActionListener!!.onAnswer(getAnswerResult(packet))
+                        rtcActionListener!!.onAnswer(answerResult)
                     }
                 }
                 else -> {
@@ -103,8 +106,8 @@ class MqttPeer : MqttCallbackExtended, IMqttActionListener {
 
     fun publish(topic: String?, message: String?) {
         if (mqttClient != null && topic != null && message != null) {
-            Log.d(TAG, "Request Published")
             mqttClient!!.publish(topic, message.toByteArray(), 0, false)
+            Log.d(TAG, "Request Published")
         }
     }
 }
