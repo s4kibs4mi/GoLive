@@ -41,10 +41,10 @@ class MainActivity : AppCompatActivity(), RtcListener {
     private val AUDIO_CODEC_OPUS = "opus"
 
     // To Hide Video Screen
-    private val HIDDEN_VIEW_X = 0
-    private val HIDDEN_VIEW_Y = 0
-    private val HIDDEN_VIEW_WIDTH = 0
-    private val HIDDEN_VIEW_HEIGHT = 0
+    private val HIDDEN_VIEW_X = 1
+    private val HIDDEN_VIEW_Y = 1
+    private val HIDDEN_VIEW_WIDTH = 1
+    private val HIDDEN_VIEW_HEIGHT = 1
 
     // To Show Video Screen
     private val VISIBLE_VIEW_X = 0
@@ -157,11 +157,8 @@ class MainActivity : AppCompatActivity(), RtcListener {
             }
 
             VideoRendererGui.update(localRenderCallback,
-                    HIDDEN_VIEW_X + 1, HIDDEN_VIEW_Y + 1, HIDDEN_VIEW_WIDTH + 1, HIDDEN_VIEW_HEIGHT + 1,
+                    HIDDEN_VIEW_X, HIDDEN_VIEW_Y, HIDDEN_VIEW_WIDTH, HIDDEN_VIEW_HEIGHT,
                     scalingType, true)
-//            VideoRendererGui.update(remoteRenderCallback,
-//                    VISIBLE_VIEW_X, VISIBLE_VIEW_Y, VISIBLE_VIEW_WIDTH, VISIBLE_VIEW_HEIGHT,
-//                    scalingType, true)
         }
     }
 
